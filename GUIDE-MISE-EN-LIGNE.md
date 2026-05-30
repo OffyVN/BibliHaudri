@@ -1,36 +1,46 @@
 # Bibliothèque de Thanh Nghiem — guide d'utilisation
 
-Vous avez trois fichiers :
+L'application est un site statique composé de **plusieurs fichiers/dossiers — à déployer ensemble** :
 
-- **`index.html`** — la bibliothèque (l'application). C'est le seul fichier à mettre en ligne.
+- **`index.html`** — la bibliothèque (l'application).
+- **`data/books.json`** — la liste des 186 livres (chargée par `index.html`). **Indispensable.**
+- **`photos/`** — les 32 photos d'étagères (pour la vérification des fiches « à vérifier »). **Indispensable.**
+- **`backend-commentaires.sql`** — à coller dans Supabase, pour les commentaires partagés.
+- **`backend-corrections.sql`** — à coller dans Supabase, pour les **corrections/validations partagées** des fiches « à vérifier ».
 - **`GUIDE-MISE-EN-LIGNE.md`** — ce guide.
-- **`backend-commentaires.sql`** — à copier-coller dans Supabase (étape 3), pour les commentaires partagés.
+
+> ⚠️ Depuis cette version, les livres sont dans `data/books.json` (et non plus dans `index.html`).
+> Il faut donc **toujours** déployer `index.html` **avec** les dossiers `data/` et `photos/`.
 
 ---
 
 ## 1. Essayer tout de suite (sur votre ordinateur)
 
-Double-cliquez sur **`index.html`** : il s'ouvre dans votre navigateur. Vous pouvez parcourir,
-chercher, filtrer, ouvrir une fiche et laisser un commentaire.
+Le plus simple est d'ouvrir le **lien en ligne** (voir étape 2). Pour tester en local, un simple
+double-clic **ne suffit plus** (le navigateur bloque le chargement de `data/books.json` en `file://`).
+Lancez un petit serveur depuis le dossier du projet :
 
-> À ce stade les commentaires sont **locaux** : ils restent dans **votre** navigateur et ne sont
-> pas vus par les autres. Pour les partager, faites les étapes 2 et 3.
+```bash
+cd <dossier-du-projet>
+python3 -m http.server 8000
+# puis ouvrez http://localhost:8000 dans le navigateur
+```
+
+> À ce stade, commentaires et corrections sont **locaux** (dans votre navigateur) tant que Supabase
+> n'est pas configuré. Pour les partager, faites les étapes 2 et 3.
 
 ---
 
 ## 2. Mettre la bibliothèque en ligne (pour faire tourner le lien)
 
-Le plus simple, gratuit et sans compte technique : **Netlify Drop**.
+Le site actuel est publié sur **GitHub Pages** : https://offyvn.github.io/BibliHaudri/
 
-1. Allez sur **https://app.netlify.com/drop**
-2. Glissez-déposez le fichier **`index.html`** dans la zone indiquée.
-3. Netlify vous donne aussitôt une **adresse publique** (ex. `https://joli-nom-123.netlify.app`).
-   C'est le lien que vous faites circuler.
-4. (Conseillé) Créez un compte gratuit Netlify pour que le lien reste permanent et que vous
-   puissiez redéposer une version mise à jour.
+Pour mettre à jour, poussez/déposez sur le dépôt `OffyVN/BibliHaudri` **l'ensemble** :
+`index.html`, le dossier **`data/`** et le dossier **`photos/`** (sans ces deux dossiers, la liste
+des livres et les photos de vérification ne s'afficheront pas).
 
-> Variantes possibles : GitHub Pages, Cloudflare Pages, Vercel, ou tout hébergement de fichier
-> statique. N'importe lequel fait l'affaire — il n'y a qu'un fichier HTML.
+> Variantes équivalentes : Netlify Drop, Cloudflare Pages, Vercel… N'importe quel hébergement de
+> fichiers statiques convient, à condition d'y déposer **index.html + data/ + photos/** ensemble.
 
 ---
 
@@ -44,10 +54,15 @@ On utilise **Supabase** (gratuit). Comptez ~5 minutes, une seule fois.
    définissez un mot de passe de base de données (gardez-le, peu importe lequel).
 3. Attendez ~1 minute que le projet soit prêt.
 
-### b. Créer la table des commentaires
+### b. Créer les tables (commentaires + corrections)
 1. Dans le menu de gauche, ouvrez **SQL Editor** → *New query*.
 2. Ouvrez le fichier **`backend-commentaires.sql`**, copiez **tout** son contenu, collez-le, puis
-   cliquez **Run**. Vous devez voir « Success ».
+   cliquez **Run**. Vous devez voir « Success ». (table `interets`, pour les intérêts)
+3. *New query* à nouveau, puis faites de même avec **`backend-corrections.sql`** → **Run**.
+   (table `corrections`, pour les **validations / corrections** des fiches « à vérifier »)
+
+> Sans la table `corrections`, l'appli reste utilisable mais le bouton « ✓ Valider la fiche »
+> affichera une erreur (les validations ne pourront pas être enregistrées en ligne).
 
 ### c. Récupérer les 2 clés
 1. Menu de gauche → **Project Settings** (la roue dentée) → **API**.
@@ -78,14 +93,17 @@ Non, elle est conçue pour être publique (côté navigateur). Les règles de s�
 fichier SQL n'autorisent que **lire** et **ajouter** un commentaire — impossible d'effacer ou de
 modifier les commentaires des autres depuis le site.
 
-**Quelqu'un peut-il modérer / supprimer un commentaire ?**
-Oui, vous. Dans Supabase → **Table Editor** → table `interets`, vous voyez tous les messages et
-pouvez en supprimer.
+**Quelqu'un peut-il modérer / supprimer un commentaire ou une correction ?**
+Oui, vous. Dans Supabase → **Table Editor** → table `interets` (commentaires) ou `corrections`
+(validations), vous voyez toutes les lignes et pouvez en supprimer. Pour les corrections, c'est la
+**ligne la plus récente** d'un livre qui fait foi.
 
 **Comment mettre à jour la liste des livres plus tard ?**
-La liste est intégrée dans `index.html`. Dites-le moi et je régénère le fichier ; vous n'aurez qu'à
-le redéposer sur Netlify.
+La liste est dans **`data/books.json`** (un livre = un objet avec `title`, `author`, `summary`…).
+On peut l'éditer directement, ou me le demander. Pensez à redéployer `data/books.json` ensuite.
 
-**Un badge « à vérifier » apparaît sur certains livres.**
-Le titre/auteur a été lu automatiquement sur la photo et peut comporter une petite erreur. Signalez
--les moi et je corrige.
+**Un badge « à vérifier » apparaît sur certains livres — comment le faire disparaître ?**
+Le titre/auteur a été lu automatiquement sur une photo et peut comporter une erreur. Ouvrez la
+fiche : sous les **photos d'origine**, le bloc « Vérifier cette fiche » permet de corriger le
+titre/auteur si besoin puis de cliquer **« ✓ Valider la fiche »**. Le badge disparaît alors pour
+tout le monde (validation enregistrée dans la table `corrections`).
