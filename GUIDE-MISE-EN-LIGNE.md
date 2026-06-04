@@ -7,6 +7,7 @@ L'application est un site statique composé de **plusieurs fichiers/dossiers —
 - **`photos/`** — les 32 photos d'étagères (pour la vérification des fiches « à vérifier »). **Indispensable.**
 - **`backend-commentaires.sql`** — à coller dans Supabase, pour les commentaires partagés.
 - **`backend-corrections.sql`** — à coller dans Supabase, pour les **corrections/validations partagées** des fiches « à vérifier ».
+- **`backend-boxes.sql`** — à coller dans Supabase, pour les **cadres partagés** (rectangles qui repèrent la tranche d'un livre sur sa photo).
 - **`GUIDE-MISE-EN-LIGNE.md`** — ce guide.
 
 > ⚠️ Depuis cette version, les livres sont dans `data/books.json` (et non plus dans `index.html`).
@@ -60,9 +61,12 @@ On utilise **Supabase** (gratuit). Comptez ~5 minutes, une seule fois.
    cliquez **Run**. Vous devez voir « Success ». (table `interets`, pour les intérêts)
 3. *New query* à nouveau, puis faites de même avec **`backend-corrections.sql`** → **Run**.
    (table `corrections`, pour les **validations / corrections** des fiches « à vérifier »)
+4. *New query* encore une fois, puis **`backend-boxes.sql`** → **Run**.
+   (table `boxes`, pour les **cadres** dessinés sur les photos qui repèrent la tranche d'un livre)
 
 > Sans la table `corrections`, l'appli reste utilisable mais le bouton « ✓ Valider la fiche »
 > affichera une erreur (les validations ne pourront pas être enregistrées en ligne).
+> De même, sans la table `boxes`, le bouton « ✏️ Encadrer ce livre » affichera une erreur.
 
 ### c. Récupérer les 2 clés
 1. Menu de gauche → **Project Settings** (la roue dentée) → **API**.
@@ -107,3 +111,11 @@ Le titre/auteur a été lu automatiquement sur une photo et peut comporter une e
 fiche : sous les **photos d'origine**, le bloc « Vérifier cette fiche » permet de corriger le
 titre/auteur si besoin puis de cliquer **« ✓ Valider la fiche »**. Le badge disparaît alors pour
 tout le monde (validation enregistrée dans la table `corrections`).
+
+**Comment « encadrer » la tranche d'un livre sur la photo (pour aider à le repérer) ?**
+Ouvrez la fiche puis **cliquez une photo** pour l'agrandir. En haut à gauche, cliquez
+**« ✏️ Encadrer ce livre »**, puis **glissez** (doigt ou souris) pour entourer la tranche du livre,
+et **« Enregistrer le cadre »**. Ensuite, à chaque ouverture de cette fiche, la photo s'ouvre avec
+la tranche mise en évidence (effet « projecteur »). Le cadre est partagé avec tout le monde
+(enregistré dans la table `boxes` ; le dernier cadre dessiné fait foi). Quelques livres sont déjà
+pré-encadrés.

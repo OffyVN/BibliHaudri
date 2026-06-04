@@ -131,6 +131,7 @@ select{padding:11px 12px;border-radius:12px;border:1px solid var(--line);backgro
 .srcthumb{height:96px;width:auto;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;
   object-fit:cover;background:var(--panel2);transition:border-color .12s}
 .srcthumb:hover{border-color:var(--accent)}
+.srcthumb.hasbox{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
 .srcthumb.miss{width:150px;height:96px;display:inline-flex;align-items:center;justify-content:center;
   font-size:11px;color:var(--muted);cursor:default;padding:6px;text-align:center}
 .verifblock{padding:18px 26px;border-bottom:1px solid var(--line);background:rgba(95,211,154,.05)}
@@ -152,11 +153,34 @@ select{padding:11px 12px;border-radius:12px;border:1px solid var(--line);backgro
 .lightbox{position:fixed;inset:0;background:rgba(4,5,20,.93);z-index:90;display:none;
   align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px}
 .lightbox.on{display:flex}
-.lightbox img{max-width:96vw;max-height:84vh;border-radius:10px;box-shadow:var(--shadow)}
+.lb-stage{position:relative;display:inline-flex;max-width:96vw;max-height:84vh}
+.lightbox img{display:block;max-width:96vw;max-height:84vh;border-radius:10px;box-shadow:var(--shadow)}
+.lb-hi{position:absolute;border:2px solid var(--accent);border-radius:4px;
+  box-shadow:0 0 0 9999px rgba(6,7,28,.62);pointer-events:none;display:none}
+.lb-hi.on{display:block}
+.lb-hi-lab{position:absolute;left:0;bottom:100%;margin-bottom:6px;white-space:nowrap;max-width:90vw;
+  overflow:hidden;text-overflow:ellipsis;font-size:12px;color:#bff3da;background:rgba(6,7,28,.78);
+  padding:3px 8px;border-radius:6px}
 .lb-cap{color:var(--muted);font-size:13px;text-align:center;max-width:90vw}
 .lb-cap b{color:var(--accent)}
 .lb-close{position:absolute;top:18px;right:24px;color:#fff;font-size:34px;cursor:pointer;line-height:1;
   background:rgba(0,0,0,.4);width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.lb-annotbtn{position:absolute;top:20px;left:24px;z-index:2;background:rgba(6,7,28,.6);color:#fff;
+  border:1px solid var(--line);padding:9px 13px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit}
+.lb-annotbtn.on{background:var(--accent);color:#06281b;font-weight:700;border-color:var(--accent)}
+.lb-stage.annot,.lb-stage.annot img{cursor:crosshair;touch-action:none}
+.lb-draw{position:absolute;border:2px dashed var(--accent);background:rgba(95,211,154,.18);
+  border-radius:3px;pointer-events:none;display:none}
+.lb-draw.on{display:block}
+.lb-annotbar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:3;display:none;
+  gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:94vw;
+  background:rgba(6,7,28,.85);border:1px solid var(--line);padding:10px 14px;border-radius:12px}
+.lb-annotbar.on{display:flex}
+.lb-annotbar .hint{color:var(--muted);font-size:12.5px}
+.lb-annotbar button{border:none;border-radius:9px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+.lb-annotbar .save{background:#5fd39a;color:#06281b;font-weight:700}
+.lb-annotbar .save:disabled{opacity:.5;cursor:default}
+.lb-annotbar .cancel{background:transparent;color:#fff;border:1px solid var(--line)}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0 40px;line-height:1.6}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0b0d2e;
   font-weight:600;padding:12px 20px;border-radius:12px;box-shadow:var(--shadow);z-index:80;opacity:0;
@@ -211,8 +235,18 @@ mark{background:rgba(174,224,233,.32);color:inherit;border-radius:3px}
 </footer>
 <div class="lightbox" id="lightbox">
   <span class="lb-close" id="lbclose">×</span>
-  <img id="lbimg" alt="Photo source">
+  <button class="lb-annotbtn" id="lbannot" type="button">✏️ Encadrer ce livre</button>
+  <div class="lb-stage" id="lbstage">
+    <img id="lbimg" alt="Photo source">
+    <div class="lb-hi" id="lbhi"><span class="lb-hi-lab" id="lbhilab"></span></div>
+    <div class="lb-draw" id="lbdraw"></div>
+  </div>
   <div class="lb-cap" id="lbcap"></div>
+  <div class="lb-annotbar" id="lbannotbar">
+    <span class="hint">Glissez sur la photo pour entourer la tranche du livre.</span>
+    <button class="save" id="lbsave" type="button" disabled>Enregistrer le cadre</button>
+    <button class="cancel" id="lbcancel" type="button">Annuler</button>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -225,12 +259,14 @@ const SUPABASE_URL = "https://fvmcjsxangsxlazxdfnc.supabase.co";       // ex: ht
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2bWNqc3hhbmdzeGxhenhkZm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzEzNzYsImV4cCI6MjA5NTcwNzM3Nn0.H3fp1uY-kgw1CkyVMvQmGaFMb3vZTZx82ERkMl2m5eI";  // la clé "anon public"
 const TABLE = "interets";
 const CORR_TABLE = "corrections";   // table des corrections / validations des fiches « à vérifier »
+const BOX_TABLE  = "boxes";         // table des cadres (rectangles) qui repèrent la tranche d'un livre sur la photo
 /* ===================================================== */
 
 let BOOKS = [];   // chargé depuis data/books.json au démarrage
 const SHARED = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 let COMMENTS = {};   // book_id -> [ {nom,commentaire,created_at} ]
 let CORR = {};       // book_id -> { titre, auteur, validated, nom, created_at } (dernière correction)
+let BOXES = {};      // book_id -> { photo, x, y, w, h } (dernier cadre dessiné, prioritaire sur celui de books.json)
 let editVerif = false;
 let current = -1, view = [];
 
@@ -316,6 +352,37 @@ async function saveCorrection(bookId,titre,auteur,nom){
   applyOneCorrection(bookId);
 }
 
+/* ---------- cadres (rectangles repérant la tranche) backend ---------- */
+const round4 = n => Math.round(n*1e4)/1e4;
+async function loadBoxes(){
+  if(SHARED){
+    try{
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/${BOX_TABLE}?select=book_id,photo,x,y,w,h,created_at&order=created_at.asc`,
+        {headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`}});
+      if(!r.ok) throw new Error('GET '+r.status);
+      const rows = await r.json();
+      BOXES = {};
+      (rows||[]).forEach(x=>{ BOXES[x.book_id]={photo:x.photo,x:x.x,y:x.y,w:x.w,h:x.h}; });  // asc -> le plus récent écrase
+    }catch(e){ console.warn('Boxes load failed (table absente ?)',e); BOXES={}; }
+  }else{
+    try{ BOXES = JSON.parse(localStorage.getItem('boxes_local')||'{}'); }
+    catch(e){ BOXES={}; }
+  }
+}
+function applyBoxes(){ BOOKS.forEach(b=>{ const x=BOXES[b.id]; if(x) b.box=x; }); }   // un cadre dessiné prime sur celui de books.json
+async function saveBox(bookId,photo,rect,nom){
+  const box={photo, x:round4(rect.x), y:round4(rect.y), w:round4(rect.w), h:round4(rect.h)};
+  if(SHARED){
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${BOX_TABLE}`,{method:'POST',
+      headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type':'application/json',Prefer:'return-minimal'},
+      body:JSON.stringify({book_id:bookId, ...box, nom:nom||null})});
+    if(!r.ok) throw new Error('POST '+r.status);
+  }
+  BOXES[bookId]=box;
+  if(!SHARED) localStorage.setItem('boxes_local',JSON.stringify(BOXES));
+}
+
 /* ---------- rendering ---------- */
 function stars(r){ if(!r) return ''; const f=Math.round(r); return '★'.repeat(f)+'☆'.repeat(5-f); }
 function coverHTML(b,big){
@@ -394,6 +461,14 @@ function drawSheet(){
     ? `<div class="ilist">${cmts.map(c=>`<div class="icmt"><span class="when">${fmtDate(c.created_at)}</span>
         <div class="who">${esc(c.nom||'Anonyme')}</div><div class="msg">${esc(c.commentaire||'')}</div></div>`).join('')}</div>`
     : `<div class="iempty">Personne ne s'est encore manifesté pour ce livre. Soyez le premier !</div>`;
+  const bx=b.box;
+  let phs=(b.photos&&b.photos.length)?b.photos.slice():[];
+  if(bx&&phs.includes(bx.photo)) phs=[bx.photo,...phs.filter(p=>p!==bx.photo)];
+  const photosHTML = phs.length
+    ? phs.map(p=>{ const hb=(bx&&bx.photo===p)?' hasbox':'';
+        return `<img class="srcthumb${hb}" data-full="photos/${esc(p)}" data-name="${esc(p)}" src="photos/${esc(p)}" loading="lazy" title="${hb?'Le livre recherché est encadré sur cette photo — cliquez':esc(p)}" onerror="this.outerHTML='<span class=&quot;srcthumb miss&quot;>Photo indisponible : '+this.dataset.name+'</span>'">`;
+      }).join('')
+    : '<span class="iempty">Aucune photo source référencée pour ce livre.</span>';
   $('#sheetBody').innerHTML=`
     <div class="sheet-head">
       <div class="sheet-cover">${coverHTML(b,true)}</div>
@@ -409,8 +484,8 @@ function drawSheet(){
       ${b.review?`<div class="rev">ℹ️ Le titre ou l'auteur a été lu automatiquement sur la photo et peut comporter une erreur. Cliquez une photo ci-dessous pour vérifier le dos du livre.</div>`:''}
     </div>
     <div class="srcwrap">
-      <div class="srclabel">📷 Photo(s) d'origine ${b.review?'<b>— vérifiez le titre / l\'auteur sur le dos</b>':''} <span style="opacity:.7">· cliquez pour agrandir</span></div>
-      <div class="srcphotos">${(b.photos&&b.photos.length)?b.photos.map(p=>`<img class="srcthumb" data-full="photos/${esc(p)}" data-name="${esc(p)}" src="photos/${esc(p)}" loading="lazy" title="${esc(p)}" onerror="this.outerHTML='<span class=&quot;srcthumb miss&quot;>Photo indisponible : '+this.dataset.name+'</span>'">`).join(''):'<span class="iempty">Aucune photo source référencée pour ce livre.</span>'}</div>
+      <div class="srclabel">📷 Photo(s) d'origine ${b.review?'<b>— vérifiez le titre / l\'auteur sur le dos</b>':''} <span style="opacity:.7">· cliquez pour agrandir${bx?' · le livre recherché y est encadré':(b.review?' · puis ✏️ encadrez sa tranche':'')}</span></div>
+      <div class="srcphotos">${photosHTML}</div>
     </div>
     ${(b.review||CORR[b.id])?`<div class="verifblock" id="verifblock">${verifHTML(b)}</div>`:''}
     <div class="interest">
@@ -434,8 +509,8 @@ function drawSheet(){
     try{ await addComment(b.id,nom,msg); toast('Merci '+nom+' ! Votre intérêt est enregistré.'); drawSheet(); render(); }
     catch(e){ toast('Échec de l\'envoi. Réessayez.'); btn.disabled=false; btn.textContent='Je suis intéressé·e'; }
   };
-  $('#sheetBody').querySelectorAll('.srcthumb').forEach(t=>{ if(t.dataset.full) t.onclick=()=>openLightbox(t.dataset.full,t.dataset.name); });
-  const rb=$('#sheetRevBadge'); if(rb&&b.photos&&b.photos.length) rb.onclick=()=>openLightbox('photos/'+b.photos[0],b.photos[0]);
+  $('#sheetBody').querySelectorAll('.srcthumb').forEach(t=>{ if(!t.dataset.full) return; const isBox=bx&&t.dataset.name===bx.photo; t.onclick=()=>openLightbox(t.dataset.full,t.dataset.name,isBox?bx:null,isBox?b.title:''); });
+  const rb=$('#sheetRevBadge'); if(rb&&b.photos&&b.photos.length) rb.onclick=()=> bx?openLightbox('photos/'+bx.photo,bx.photo,bx,b.title):openLightbox('photos/'+b.photos[0],b.photos[0]);
   const ve=$('#verifEdit'); if(ve) ve.onclick=()=>{ editVerif=true; drawSheet(); };
   const vf=$('#vform'); if(vf) vf.onsubmit=async ev=>{
     ev.preventDefault();
@@ -446,8 +521,55 @@ function drawSheet(){
     catch(e){ console.error(e); toast('Échec de l\'enregistrement (la table « corrections » existe-t-elle dans Supabase ?)'); btn.disabled=false; btn.textContent='✓ Valider la fiche'; }
   };
 }
-function openLightbox(src,name){ $('#lbimg').src=src; $('#lbcap').innerHTML=name?`Photo d'origine : <b>${esc(name)}</b> — repérez le livre sur l'étagère`:''; $('#lightbox').classList.add('on'); }
-function closeLightbox(){ $('#lightbox').classList.remove('on'); $('#lbimg').removeAttribute('src'); }
+let lbBook=null, lbPhoto=null, annotMode=false, drawing=false, drawStart=null, drawRect=null;
+function openLightbox(src,name,box,label){
+  lbBook=view[current]||null; lbPhoto=name||null;
+  setAnnot(false);
+  $('#lbimg').src=src;
+  const hi=$('#lbhi');
+  if(box){ hi.style.left=(box.x*100)+'%'; hi.style.top=(box.y*100)+'%'; hi.style.width=(box.w*100)+'%'; hi.style.height=(box.h*100)+'%';
+    $('#lbhilab').textContent=label||''; $('#lbhilab').style.display=label?'':'none'; hi.classList.add('on'); }
+  else hi.classList.remove('on');
+  $('#lbannot').style.display = lbBook ? '' : 'none';
+  $('#lbannot').textContent = box ? '✏️ Refaire le cadre' : '✏️ Encadrer ce livre';
+  $('#lbcap').innerHTML = box ? `Photo d'origine : <b>${esc(name)}</b> — le livre recherché est mis en évidence`
+    : (name?`Photo d'origine : <b>${esc(name)}</b> — repérez le livre sur l'étagère`:'');
+  $('#lightbox').classList.add('on');
+}
+function closeLightbox(){ setAnnot(false); $('#lightbox').classList.remove('on'); $('#lbimg').removeAttribute('src'); $('#lbhi').classList.remove('on'); }
+/* ----- mode annotation (dessiner le cadre d'un livre sur la photo) ----- */
+function setAnnot(on){
+  annotMode=on; drawing=false; drawStart=null; drawRect=null;
+  $('#lbstage').classList.toggle('annot',on);
+  $('#lbannot').classList.toggle('on',on);
+  $('#lbannot').textContent = on ? 'Dessinez le cadre…' : (lbBook&&lbBook.box?'✏️ Refaire le cadre':'✏️ Encadrer ce livre');
+  $('#lbannotbar').classList.toggle('on',on);
+  $('#lbdraw').classList.remove('on');
+  $('#lbsave').disabled=true;
+  if(on) $('#lbhi').classList.remove('on');     // masquer le cadre existant pendant le tracé
+  else if(lbBook&&lbBook.box&&lbPhoto===lbBook.box.photo) $('#lbhi').classList.add('on');
+}
+function annotPoint(e){
+  const r=$('#lbimg').getBoundingClientRect();
+  return { x:Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),
+           y:Math.min(1,Math.max(0,(e.clientY-r.top)/r.height)) };
+}
+function normRect(a,b){ return {x:Math.min(a.x,b.x), y:Math.min(a.y,b.y), w:Math.abs(a.x-b.x), h:Math.abs(a.y-b.y)}; }
+function updateDraw(a,b){ const r=normRect(a,b); const d=$('#lbdraw');
+  d.style.left=(r.x*100)+'%'; d.style.top=(r.y*100)+'%'; d.style.width=(r.w*100)+'%'; d.style.height=(r.h*100)+'%'; d.classList.add('on'); }
+async function commitBox(){
+  if(!drawRect||!lbBook||!lbPhoto) return;
+  const nom=(prompt('Votre nom (facultatif) — pour savoir qui a placé le cadre :','')||'').trim();
+  const btn=$('#lbsave'); btn.disabled=true; btn.textContent='Enregistrement…';
+  try{
+    await saveBox(lbBook.id,lbPhoto,drawRect,nom);
+    lbBook.box={photo:lbPhoto, x:round4(drawRect.x), y:round4(drawRect.y), w:round4(drawRect.w), h:round4(drawRect.h)};
+    toast('Cadre enregistré'+(nom?' — merci '+nom:'')+' !');
+    setAnnot(false);
+    openLightbox('photos/'+lbPhoto, lbPhoto, lbBook.box, lbBook.title);
+    if($('#overlay').classList.contains('on')) drawSheet();
+  }catch(e){ console.error(e); toast('Échec de l\'enregistrement (la table « boxes » existe-t-elle dans Supabase ?)'); btn.disabled=false; btn.textContent='Enregistrer le cadre'; }
+}
 function fmtDate(s){ try{const d=new Date(s);return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';} }
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600);}
 
@@ -471,7 +593,18 @@ function init(){
   $('#close').onclick=closeSheet; $('#prev').onclick=()=>step(-1); $('#next').onclick=()=>step(1);
   $('#overlay').onclick=e=>{if(e.target===$('#overlay'))closeSheet();};
   $('#lbclose').onclick=closeLightbox;
-  $('#lightbox').onclick=e=>{if(e.target===$('#lightbox'))closeLightbox();};
+  $('#lightbox').onclick=e=>{ if(annotMode) return; if(e.target===$('#lightbox'))closeLightbox(); };
+  $('#lbannot').onclick=()=>setAnnot(!annotMode);
+  $('#lbcancel').onclick=()=>setAnnot(false);
+  $('#lbsave').onclick=commitBox;
+  const stage=$('#lbstage');
+  stage.addEventListener('pointerdown',e=>{ if(!annotMode)return; e.preventDefault(); drawing=true;
+    try{stage.setPointerCapture(e.pointerId);}catch(_){} drawStart=annotPoint(e); drawRect=null; updateDraw(drawStart,drawStart); });
+  stage.addEventListener('pointermove',e=>{ if(!annotMode||!drawing)return; e.preventDefault(); updateDraw(drawStart,annotPoint(e)); });
+  stage.addEventListener('pointerup',e=>{ if(!annotMode||!drawing)return; drawing=false;
+    const r=normRect(drawStart,annotPoint(e));
+    if(r.w>0.012&&r.h>0.012){ drawRect=r; updateDraw({x:r.x,y:r.y},{x:r.x+r.w,y:r.y+r.h}); $('#lbsave').disabled=false; }
+    else { drawRect=null; $('#lbdraw').classList.remove('on'); $('#lbsave').disabled=true; } });
   document.addEventListener('keydown',e=>{
     if($('#lightbox').classList.contains('on')){ if(e.key==='Escape')closeLightbox(); return; }
     if(!$('#overlay').classList.contains('on'))return;
@@ -485,8 +618,9 @@ async function boot(){
     $('#grid').innerHTML='<p style="color:var(--muted);padding:20px 2px">Impossible de charger la liste des livres (data/books.json).<br>Ouvrez le site via un serveur web (http/https), pas par double-clic du fichier.</p>';
     return;
   }
-  await Promise.all([loadComments(), loadCorrections()]);
+  await Promise.all([loadComments(), loadCorrections(), loadBoxes()]);
   applyCorrections();
+  applyBoxes();
   init();
 }
 boot();
