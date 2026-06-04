@@ -131,6 +131,7 @@ select{padding:11px 12px;border-radius:12px;border:1px solid var(--line);backgro
 .srcthumb{height:96px;width:auto;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;
   object-fit:cover;background:var(--panel2);transition:border-color .12s}
 .srcthumb:hover{border-color:var(--accent)}
+.srcthumb.hasbox{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
 .srcthumb.miss{width:150px;height:96px;display:inline-flex;align-items:center;justify-content:center;
   font-size:11px;color:var(--muted);cursor:default;padding:6px;text-align:center}
 .verifblock{padding:18px 26px;border-bottom:1px solid var(--line);background:rgba(95,211,154,.05)}
@@ -152,7 +153,14 @@ select{padding:11px 12px;border-radius:12px;border:1px solid var(--line);backgro
 .lightbox{position:fixed;inset:0;background:rgba(4,5,20,.93);z-index:90;display:none;
   align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px}
 .lightbox.on{display:flex}
-.lightbox img{max-width:96vw;max-height:84vh;border-radius:10px;box-shadow:var(--shadow)}
+.lb-stage{position:relative;display:inline-flex;max-width:96vw;max-height:84vh}
+.lightbox img{display:block;max-width:96vw;max-height:84vh;border-radius:10px;box-shadow:var(--shadow)}
+.lb-hi{position:absolute;border:2px solid var(--accent);border-radius:4px;
+  box-shadow:0 0 0 9999px rgba(6,7,28,.62);pointer-events:none;display:none}
+.lb-hi.on{display:block}
+.lb-hi-lab{position:absolute;left:0;bottom:100%;margin-bottom:6px;white-space:nowrap;max-width:90vw;
+  overflow:hidden;text-overflow:ellipsis;font-size:12px;color:#bff3da;background:rgba(6,7,28,.78);
+  padding:3px 8px;border-radius:6px}
 .lb-cap{color:var(--muted);font-size:13px;text-align:center;max-width:90vw}
 .lb-cap b{color:var(--accent)}
 .lb-close{position:absolute;top:18px;right:24px;color:#fff;font-size:34px;cursor:pointer;line-height:1;
@@ -211,7 +219,10 @@ mark{background:rgba(174,224,233,.32);color:inherit;border-radius:3px}
 </footer>
 <div class="lightbox" id="lightbox">
   <span class="lb-close" id="lbclose">×</span>
-  <img id="lbimg" alt="Photo source">
+  <div class="lb-stage" id="lbstage">
+    <img id="lbimg" alt="Photo source">
+    <div class="lb-hi" id="lbhi"><span class="lb-hi-lab" id="lbhilab"></span></div>
+  </div>
   <div class="lb-cap" id="lbcap"></div>
 </div>
 <div class="toast" id="toast"></div>
@@ -394,6 +405,14 @@ function drawSheet(){
     ? `<div class="ilist">${cmts.map(c=>`<div class="icmt"><span class="when">${fmtDate(c.created_at)}</span>
         <div class="who">${esc(c.nom||'Anonyme')}</div><div class="msg">${esc(c.commentaire||'')}</div></div>`).join('')}</div>`
     : `<div class="iempty">Personne ne s'est encore manifesté pour ce livre. Soyez le premier !</div>`;
+  const bx=b.box;
+  let phs=(b.photos&&b.photos.length)?b.photos.slice():[];
+  if(bx&&phs.includes(bx.photo)) phs=[bx.photo,...phs.filter(p=>p!==bx.photo)];
+  const photosHTML = phs.length
+    ? phs.map(p=>{ const hb=(bx&&bx.photo===p)?' hasbox':'';
+        return `<img class="srcthumb${hb}" data-full="photos/${esc(p)}" data-name="${esc(p)}" src="photos/${esc(p)}" loading="lazy" title="${hb?'Le livre recherché est encadré sur cette photo — cliquez':esc(p)}" onerror="this.outerHTML='<span class=&quot;srcthumb miss&quot;>Photo indisponible : '+this.dataset.name+'</span>'">`;
+      }).join('')
+    : '<span class="iempty">Aucune photo source référencée pour ce livre.</span>';
   $('#sheetBody').innerHTML=`
     <div class="sheet-head">
       <div class="sheet-cover">${coverHTML(b,true)}</div>
@@ -409,8 +428,8 @@ function drawSheet(){
       ${b.review?`<div class="rev">ℹ️ Le titre ou l'auteur a été lu automatiquement sur la photo et peut comporter une erreur. Cliquez une photo ci-dessous pour vérifier le dos du livre.</div>`:''}
     </div>
     <div class="srcwrap">
-      <div class="srclabel">📷 Photo(s) d'origine ${b.review?'<b>— vérifiez le titre / l\'auteur sur le dos</b>':''} <span style="opacity:.7">· cliquez pour agrandir</span></div>
-      <div class="srcphotos">${(b.photos&&b.photos.length)?b.photos.map(p=>`<img class="srcthumb" data-full="photos/${esc(p)}" data-name="${esc(p)}" src="photos/${esc(p)}" loading="lazy" title="${esc(p)}" onerror="this.outerHTML='<span class=&quot;srcthumb miss&quot;>Photo indisponible : '+this.dataset.name+'</span>'">`).join(''):'<span class="iempty">Aucune photo source référencée pour ce livre.</span>'}</div>
+      <div class="srclabel">📷 Photo(s) d'origine ${b.review?'<b>— vérifiez le titre / l\'auteur sur le dos</b>':''} <span style="opacity:.7">· cliquez pour agrandir${bx?' · le livre recherché y est encadré':''}</span></div>
+      <div class="srcphotos">${photosHTML}</div>
     </div>
     ${(b.review||CORR[b.id])?`<div class="verifblock" id="verifblock">${verifHTML(b)}</div>`:''}
     <div class="interest">
@@ -434,8 +453,8 @@ function drawSheet(){
     try{ await addComment(b.id,nom,msg); toast('Merci '+nom+' ! Votre intérêt est enregistré.'); drawSheet(); render(); }
     catch(e){ toast('Échec de l\'envoi. Réessayez.'); btn.disabled=false; btn.textContent='Je suis intéressé·e'; }
   };
-  $('#sheetBody').querySelectorAll('.srcthumb').forEach(t=>{ if(t.dataset.full) t.onclick=()=>openLightbox(t.dataset.full,t.dataset.name); });
-  const rb=$('#sheetRevBadge'); if(rb&&b.photos&&b.photos.length) rb.onclick=()=>openLightbox('photos/'+b.photos[0],b.photos[0]);
+  $('#sheetBody').querySelectorAll('.srcthumb').forEach(t=>{ if(!t.dataset.full) return; const isBox=bx&&t.dataset.name===bx.photo; t.onclick=()=>openLightbox(t.dataset.full,t.dataset.name,isBox?bx:null,isBox?b.title:''); });
+  const rb=$('#sheetRevBadge'); if(rb&&b.photos&&b.photos.length) rb.onclick=()=> bx?openLightbox('photos/'+bx.photo,bx.photo,bx,b.title):openLightbox('photos/'+b.photos[0],b.photos[0]);
   const ve=$('#verifEdit'); if(ve) ve.onclick=()=>{ editVerif=true; drawSheet(); };
   const vf=$('#vform'); if(vf) vf.onsubmit=async ev=>{
     ev.preventDefault();
@@ -446,8 +465,17 @@ function drawSheet(){
     catch(e){ console.error(e); toast('Échec de l\'enregistrement (la table « corrections » existe-t-elle dans Supabase ?)'); btn.disabled=false; btn.textContent='✓ Valider la fiche'; }
   };
 }
-function openLightbox(src,name){ $('#lbimg').src=src; $('#lbcap').innerHTML=name?`Photo d'origine : <b>${esc(name)}</b> — repérez le livre sur l'étagère`:''; $('#lightbox').classList.add('on'); }
-function closeLightbox(){ $('#lightbox').classList.remove('on'); $('#lbimg').removeAttribute('src'); }
+function openLightbox(src,name,box,label){
+  $('#lbimg').src=src;
+  const hi=$('#lbhi');
+  if(box){ hi.style.left=(box.x*100)+'%'; hi.style.top=(box.y*100)+'%'; hi.style.width=(box.w*100)+'%'; hi.style.height=(box.h*100)+'%';
+    $('#lbhilab').textContent=label||''; $('#lbhilab').style.display=label?'':'none'; hi.classList.add('on'); }
+  else hi.classList.remove('on');
+  $('#lbcap').innerHTML = box ? `Photo d'origine : <b>${esc(name)}</b> — le livre recherché est mis en évidence`
+    : (name?`Photo d'origine : <b>${esc(name)}</b> — repérez le livre sur l'étagère`:'');
+  $('#lightbox').classList.add('on');
+}
+function closeLightbox(){ $('#lightbox').classList.remove('on'); $('#lbimg').removeAttribute('src'); $('#lbhi').classList.remove('on'); }
 function fmtDate(s){ try{const d=new Date(s);return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';} }
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600);}
 
