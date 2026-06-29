@@ -8,7 +8,7 @@ L'application est un site statique composé de **plusieurs fichiers/dossiers —
 - **`backend-commentaires.sql`** — à coller dans Supabase, pour les commentaires partagés.
 - **`backend-corrections.sql`** — à coller dans Supabase, pour les **corrections/validations partagées** des fiches « à vérifier ».
 - **`backend-boxes.sql`** — à coller dans Supabase, pour les **cadres partagés** (rectangles qui repèrent la tranche d'un livre sur sa photo).
-- **`backend-livres.sql`** — à coller dans Supabase, pour les **listes personnelles** : chaque utilisateur gère ses propres livres (table `livres`).
+- **`backend-livres.sql`** — à coller dans Supabase, pour les **livres de la communauté** : chaque membre gère ses propres livres (table `livres`, avec disponibilité « à emprunter / à donner / à vendre », prix, localisation) **et** le stockage des photos (bucket `livres-photos`).
 - **`GUIDE-MISE-EN-LIGNE.md`** — ce guide.
 
 > ⚠️ Depuis cette version, les livres sont dans `data/books.json` (et non plus dans `index.html`).
@@ -65,7 +65,15 @@ On utilise **Supabase** (gratuit). Comptez ~5 minutes, une seule fois.
 4. *New query* encore une fois, puis **`backend-boxes.sql`** → **Run**.
    (table `boxes`, pour les **cadres** dessinés sur les photos qui repèrent la tranche d'un livre)
 5. *New query* une dernière fois, puis **`backend-livres.sql`** → **Run**.
-   (table `livres`, pour les **listes personnelles** — les livres que chaque utilisateur ajoute)
+   (table `livres` + bucket de photos `livres-photos` — les livres que chaque membre ajoute,
+   avec leur disponibilité, prix, localisation et photo)
+
+> **Photos.** Le fichier `backend-livres.sql` tente aussi de créer le bucket de stockage
+> **`livres-photos`** (public). Si l'éditeur SQL refuse cette partie (droits sur le schéma
+> `storage`), créez le bucket à la main : Supabase → **Storage** → **New bucket** → nom
+> `livres-photos`, cochez **Public bucket** ; puis ré-exécutez seulement les deux `create policy`
+> de la fin du fichier. Sans ce bucket, l'appli reste utilisable mais l'envoi d'une photo
+> échouera (on peut alors coller une URL d'image à la place).
 
 > Sans la table `livres`, l'appli reste utilisable mais l'ajout d'un livre via « ➕ Ajouter un livre »
 > affichera une erreur (la bibliothèque d'origine de Thanh Nghiem reste consultable).
@@ -120,6 +128,23 @@ ce navigateur, sans création de compte). Vous pouvez alors **➕ ajouter** des 
 / supprimer** ceux de votre liste depuis leur fiche. Le sélecteur **« bibliothèque »** de la barre
 d'outils permet de filtrer par personne (ou « ⭐ Ma liste »). La bibliothèque d'origine reste celle
 de **Thanh Nghiem**.
+
+**Comment « numériser » un livre en prenant une photo ?**
+Cliquez **« ➕ Ajouter un livre »**, puis **« 📷 Photo du livre »** : sur téléphone, l'appareil photo
+s'ouvre directement. La photo devient l'illustration du livre. Cliquez ensuite
+**« ✨ Lire le titre sur la photo »** : l'application lit le texte de la couverture (OCR, dans le
+navigateur) et propose un titre — corrigez-le si besoin. La lecture automatique n'est jamais
+parfaite : vous pouvez toujours tout saisir/ajuster à la main.
+
+**Comment indiquer qu'un livre est à emprunter / à donner / à vendre, et où le trouver ?**
+Dans la fiche d'ajout/modification, choisissez la **Disponibilité** (à emprunter, à donner, à vendre —
+avec un **prix** dans ce dernier cas) et renseignez **« Où le trouver »** en texte libre
+(ex. « Étagère entrée du 47 », « Chez Duc »). La disponibilité apparaît en pastille sur la carte et
+dans la fiche ; la barre d'outils permet de **filtrer par disponibilité**, et la recherche couvre
+aussi la localisation.
+
+> Note : les 186 livres d'origine de Thanh Nghiem n'ont pas de disponibilité/localisation (c'est la
+> collection existante). Ces informations concernent les livres ajoutés par la communauté.
 
 > Modèle de confiance : comme pour les commentaires, il n'y a **pas d'authentification** côté serveur.
 > L'application ne propose la modification/suppression que sur *vos* livres (ceux à votre nom), mais
