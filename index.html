@@ -187,15 +187,72 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:26px 0 40px;l
   transition:opacity .25s, transform .25s;pointer-events:none;font-size:14px}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(-4px)}
 mark{background:rgba(174,224,233,.32);color:inherit;border-radius:3px}
+
+/* ---- multi-utilisateurs : barre d'identité, filtre bibliothèque, formulaire livre ---- */
+.userbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:13.5px;color:var(--muted)}
+.userbar b{color:var(--text)}
+.userbar .who{background:var(--panel);border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+.userbar button{background:transparent;border:1px solid var(--line);color:var(--accent);padding:6px 12px;
+  border-radius:999px;cursor:pointer;font-size:13px;font-family:inherit}
+.userbar button:hover{border-color:var(--accent-dim)}
+.userbar button.primary{background:var(--accent);color:#0b0d2e;border-color:var(--accent);font-weight:700}
+.btn-add{padding:11px 14px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);
+  color:#0b0d2e;font-weight:700;font-size:14px;cursor:pointer}
+.btn-add:hover{filter:brightness(1.06)}
+.owner-badge{position:absolute;bottom:8px;left:8px;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;background:rgba(12,14,48,.78);color:var(--accent);font-size:10px;font-weight:600;
+  padding:3px 8px;border-radius:999px;border:1px solid var(--line)}
+.sheet-controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.sheet-controls button{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);
+  color:var(--text);cursor:pointer;font-size:13.5px;font-family:inherit}
+.sheet-controls .edit:hover{border-color:var(--accent-dim)}
+.sheet-controls .del{color:#f3a0a0;border-color:rgba(243,160,160,.32)}
+.sheet-controls .del:hover{background:rgba(243,160,160,.1)}
+.bform{display:grid;gap:12px;padding:26px}
+.bform h3{margin:0;font-size:19px}
+.bform .sub{color:var(--muted);font-size:13px;margin:-4px 0 6px;line-height:1.5}
+.bform label{display:grid;gap:5px;font-size:12.5px;color:var(--muted)}
+.bform input,.bform textarea{padding:11px 13px;border-radius:11px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+.bform textarea{min-height:90px;resize:vertical}
+.bform input:focus,.bform textarea:focus{border-color:var(--accent-dim)}
+.bform .brow{display:flex;gap:10px;flex-wrap:wrap}.bform .brow label{flex:1;min-width:150px}
+.bform select{padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);
+  color:var(--text);font-size:14px;font-family:inherit;outline:none;max-width:none;width:100%}
+.bform .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:4px}
+/* numérisation : photo + OCR */
+.photo-up{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;padding:14px}
+.photo-prev{width:96px;flex:0 0 96px;aspect-ratio:2/3;border-radius:8px;overflow:hidden;
+  background:linear-gradient(155deg,#2a2d68,#191c52);display:flex;align-items:center;justify-content:center}
+.photo-prev img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-prev .ph-empty{font-size:11px;color:var(--muted);text-align:center;padding:8px}
+.photo-actions{flex:1;min-width:200px;display:flex;flex-direction:column;gap:9px}
+.filebtn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#0b0d2e;font-weight:700;
+  padding:11px 14px;border-radius:11px;cursor:pointer;font-size:14px;justify-self:start;width:fit-content}
+.ocrbtn{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px 14px;
+  border-radius:11px;cursor:pointer;font-size:13.5px;font-family:inherit;width:fit-content}
+.ocrbtn:hover{border-color:var(--accent-dim)}.ocrbtn:disabled{opacity:.5;cursor:default}
+.upnote{font-size:12px;color:var(--muted);line-height:1.45}
+/* statuts de disponibilité */
+.st-badge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;
+  color:#0b0d2e;letter-spacing:.02em}
+.stchip{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px;color:#0b0d2e}
+.st-borrow{background:#AEE0E9}.st-give{background:#7be3a6}.st-sell{background:#f3c969}
+.avail{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:7px}
+.avail .loc{font-size:11px;color:var(--accent-dim);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <div class="brand"><span class="mark">Bibliothèque partagée</span></div>
+  <div class="brand"><span class="mark">Le 47 · livres partagés</span></div>
   <h1>La bibliothèque de Thanh Nghiem</h1>
-  <p class="lede">Cet inventaire a vocation à être partagé : parcourez les livres, et si l'un d'eux vous fait
-  envie, ouvrez sa fiche et laissez votre nom avec un petit mot. Pas besoin de compte — on se fait confiance.</p>
+  <p class="lede">Le partage de livres de la communauté <b>Le 47</b> : les étagères partagées et les livres que
+  chacun propose chez soi — <b>à emprunter</b>, <b>à donner</b> ou <b>à vendre</b>. Parcourez, repérez où trouver un
+  livre, et laissez un mot si l'un vous intéresse. Pour proposer les vôtres, indiquez votre nom puis <b>numérisez-les
+  en prenant une photo</b>. Pas besoin de compte — on se fait confiance.</p>
   <div class="stats" id="stats"></div>
+  <div class="userbar" id="userbar"></div>
 </div></header>
 
 <div class="toolbar"><div class="wrap"><div class="toolbar-inner">
@@ -203,6 +260,13 @@ mark{background:rgba(174,224,233,.32);color:inherit;border-radius:3px}
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#AEE0E9" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
     <input id="q" type="search" placeholder="Rechercher un titre, un auteur, un genre…" autocomplete="off">
   </label>
+  <select id="fowner"></select>
+  <select id="fstatus">
+    <option value="">Toutes dispos</option>
+    <option value="emprunter">À emprunter</option>
+    <option value="donner">À donner</option>
+    <option value="vendre">À vendre</option>
+  </select>
   <select id="ftype"></select>
   <select id="fgenre"></select>
   <select id="sort">
@@ -212,6 +276,7 @@ mark{background:rgba(174,224,233,.32);color:inherit;border-radius:3px}
     <option value="rating">Trier : note</option>
   </select>
   <button class="btn-ghost" id="reset">Réinitialiser</button>
+  <button class="btn-add" id="addBook">➕ Ajouter un livre</button>
 </div></div></div>
 
 <main class="wrap">
@@ -229,9 +294,16 @@ mark{background:rgba(174,224,233,.32);color:inherit;border-radius:3px}
   </div>
 </div>
 
+<div class="overlay" id="formOverlay" style="z-index:60">
+  <div class="sheet" style="max-width:640px;width:100%">
+    <button class="close" id="formClose" title="Fermer">×</button>
+    <div id="bformWrap"></div>
+  </div>
+</div>
+
 <footer class="wrap">
-  Inventaire généré à partir des photos de la bibliothèque · couvertures &amp; données via Open Library ·
-  186 ouvrages. Les notes proviennent d'Open Library lorsqu'elles existent.
+  Inventaire de base généré à partir des photos de la bibliothèque · couvertures &amp; données via Open Library ·
+  enrichi par les listes que chacun partage. Les notes proviennent d'Open Library lorsqu'elles existent.
 </footer>
 <div class="lightbox" id="lightbox">
   <span class="lb-close" id="lbclose">×</span>
@@ -260,15 +332,32 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const TABLE = "interets";
 const CORR_TABLE = "corrections";   // table des corrections / validations des fiches « à vérifier »
 const BOX_TABLE  = "boxes";         // table des cadres (rectangles) qui repèrent la tranche d'un livre sur la photo
+const LIVRES_TABLE = "livres";      // table des livres ajoutés par les utilisateurs (listes personnelles)
+const SEED_OWNER = "Thanh Nghiem";  // propriétaire de l'inventaire d'origine (data/books.json)
+const PHOTO_BUCKET = "livres-photos";  // bucket Supabase Storage où sont uploadées les photos
+const OCR_SRC = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";  // OCR (lecture du titre)
 /* ===================================================== */
 
-let BOOKS = [];   // chargé depuis data/books.json au démarrage
+/* Statuts de disponibilité d'un livre dans la communauté */
+const STATUS = {
+  emprunter: { label:'À emprunter', short:'Emprunt',  cls:'st-borrow' },
+  donner:    { label:'À donner',    short:'Don',      cls:'st-give'   },
+  vendre:    { label:'À vendre',    short:'Vente',    cls:'st-sell'   }
+};
+const fmtPrice = p => (p==null||p==='')?'':(Number(p)===0?'Gratuit':Number(p).toLocaleString('fr-FR',{style:'currency',currency:'EUR'}));
+
+let BOOKS = [];   // catalogue affiché = SEED (data/books.json) + LIVRES (ajoutés par les utilisateurs)
+let SEED  = [];   // les ouvrages d'origine, propriété de Thanh Nghiem
+let LIVRES = [];  // lignes brutes de la table "livres" (livres gérés par les utilisateurs)
+let USER = '';    // nom de l'utilisateur courant : il gère sa propre liste (ajout/modif/suppression)
 const SHARED = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 let COMMENTS = {};   // book_id -> [ {nom,commentaire,created_at} ]
 let CORR = {};       // book_id -> { titre, auteur, validated, nom, created_at } (dernière correction)
 let BOXES = {};      // book_id -> { photo, x, y, w, h } (dernier cadre dessiné, prioritaire sur celui de books.json)
 let editVerif = false;
 let current = -1, view = [];
+let formEditId = null;   // id du livre en cours d'édition dans le formulaire (null = ajout)
+let formPhotoFile = null;   // fichier photo sélectionné dans le formulaire (pour OCR)
 
 const $ = s => document.querySelector(s);
 const el = (t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
@@ -309,8 +398,116 @@ const nInt = id => (COMMENTS[id]||[]).length;
 async function loadBooks(){
   const r = await fetch('data/books.json',{cache:'no-store'});
   if(!r.ok) throw new Error('books '+r.status);
-  BOOKS = await r.json();
-  BOOKS.forEach(b=>{ b._ocrTitle=b.title; b._ocrAuthor=b.author; });
+  SEED = await r.json();
+  SEED.forEach(b=>{ b._ocrTitle=b.title; b._ocrAuthor=b.author; b.owner=SEED_OWNER; b._seed=true; });
+}
+
+/* ---------- livres gérés par les utilisateurs (listes personnelles) ---------- */
+function livreToBook(row){
+  return { id:row.id, owner:row.owner, title:row.title, author:row.author||'',
+    publisher:row.publisher||null, year:row.year!=null?row.year:null,
+    type:row.type||'Autre', genre:row.genre||'Autre', summary:row.summary||'',
+    coverUrl:row.cover_url||'', status:row.status||null, price:row.price!=null?row.price:null,
+    location:row.location||'', rating:null, ratingCount:null, photos:[], review:false,
+    _seed:false, _ocrTitle:row.title, _ocrAuthor:row.author||'' };
+}
+async function loadLivres(){
+  if(SHARED){
+    try{
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/${LIVRES_TABLE}?select=*&order=created_at.asc`,
+        {headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`}});
+      if(!r.ok) throw new Error('GET '+r.status);
+      LIVRES = (await r.json())||[];
+    }catch(e){ console.warn('Livres load failed (table « livres » absente ?)',e); LIVRES=[]; }
+  }else{
+    try{ LIVRES = JSON.parse(localStorage.getItem('livres_local')||'[]'); }
+    catch(e){ LIVRES=[]; }
+  }
+}
+function rebuildBooks(){ BOOKS = [...SEED, ...LIVRES.map(livreToBook)]; }
+function nextLocalId(){ let m=999999; LIVRES.forEach(r=>{ if(r.id>m) m=r.id; }); return m+1; }
+async function saveBook(data){
+  const payload={ owner:USER, title:data.title, author:data.author||null, publisher:data.publisher||null,
+    year:data.year!=null?data.year:null, type:data.type||null, genre:data.genre||null,
+    summary:data.summary||null, cover_url:data.coverUrl||null,
+    status:data.status||null, price:data.price!=null?data.price:null, location:data.location||null };
+  if(SHARED){
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${LIVRES_TABLE}`,{method:'POST',
+      headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type':'application/json',Prefer:'return=minimal'},
+      body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error('POST '+r.status);
+    await loadLivres();   // récupère la ligne (avec son id serveur)
+  }else{
+    LIVRES.push({...payload, id:nextLocalId(), created_at:new Date().toISOString()});
+    localStorage.setItem('livres_local',JSON.stringify(LIVRES));
+  }
+  rebuildBooks();
+}
+async function updateBook(id,data){
+  const patch={ title:data.title, author:data.author||null, publisher:data.publisher||null,
+    year:data.year!=null?data.year:null, type:data.type||null, genre:data.genre||null,
+    summary:data.summary||null, cover_url:data.coverUrl||null,
+    status:data.status||null, price:data.price!=null?data.price:null, location:data.location||null,
+    updated_at:new Date().toISOString() };
+  if(SHARED){
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${LIVRES_TABLE}?id=eq.${id}`,{method:'PATCH',
+      headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type':'application/json',Prefer:'return=minimal'},
+      body:JSON.stringify(patch)});
+    if(!r.ok) throw new Error('PATCH '+r.status);
+  }
+  const row=LIVRES.find(x=>x.id===id); if(row) Object.assign(row,patch);
+  if(!SHARED) localStorage.setItem('livres_local',JSON.stringify(LIVRES));
+  rebuildBooks();
+}
+async function deleteBook(id){
+  if(SHARED){
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${LIVRES_TABLE}?id=eq.${id}`,{method:'DELETE',
+      headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,Prefer:'return=minimal'}});
+    if(!r.ok) throw new Error('DELETE '+r.status);
+  }
+  LIVRES = LIVRES.filter(x=>x.id!==id);
+  if(!SHARED) localStorage.setItem('livres_local',JSON.stringify(LIVRES));
+  rebuildBooks();
+}
+
+/* ---------- numérisation : upload de photo (Supabase Storage) ---------- */
+function slug(s){ return (s||'x').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+  .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,24)||'x'; }
+async function uploadPhoto(file){
+  if(!SHARED) throw new Error('upload indisponible hors ligne');
+  const ext=((file.name||'').split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'jpg';
+  const path=`${slug(USER)}-${Date.now()}-${Math.floor(Math.random()*1e6)}.${ext}`;
+  const r=await fetch(`${SUPABASE_URL}/storage/v1/object/${PHOTO_BUCKET}/${encodeURIComponent(path)}`,{method:'POST',
+    headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type':file.type||'image/jpeg'},
+    body:file});
+  if(!r.ok) throw new Error('upload '+r.status);
+  return `${SUPABASE_URL}/storage/v1/object/public/${PHOTO_BUCKET}/${encodeURIComponent(path)}`;
+}
+
+/* ---------- OCR : lire le titre sur la photo (Tesseract.js, chargé à la demande) ---------- */
+let _ocrLoading=null;
+function loadOCR(){
+  if(window.Tesseract) return Promise.resolve();
+  if(_ocrLoading) return _ocrLoading;
+  _ocrLoading=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=OCR_SRC;
+    s.onload=res; s.onerror=()=>rej(new Error('Tesseract introuvable')); document.head.appendChild(s); });
+  return _ocrLoading;
+}
+async function ocrImage(srcOrFile,onProgress){
+  await loadOCR();
+  const res=await window.Tesseract.recognize(srcOrFile,'fra',
+    {logger:m=>{ if(m.status==='recognizing text'&&onProgress) onProgress(m.progress); }});
+  return (res&&res.data&&res.data.text||'').trim();
+}
+function pickTitleLine(text){
+  const lines=text.split(/\n+/).map(l=>l.replace(/\s+/g,' ').trim())
+    .filter(l=>l.length>=3 && /[A-Za-zÀ-ÿ]/.test(l));
+  if(!lines.length) return '';
+  lines.sort((a,b)=>b.length-a.length);
+  return lines[0].slice(0,120);
 }
 
 /* ---------- corrections / validations backend ---------- */
@@ -385,6 +582,9 @@ async function saveBox(bookId,photo,rect,nom){
 
 /* ---------- rendering ---------- */
 function stars(r){ if(!r) return ''; const f=Math.round(r); return '★'.repeat(f)+'☆'.repeat(5-f); }
+function statusChip(b){ const s=b.status&&STATUS[b.status]; if(!s) return '';
+  const p=(b.status==='vendre')?` · ${fmtPrice(b.price)}`:'';
+  return `<span class="stchip ${s.cls}">${s.label}${p}</span>`; }
 function coverHTML(b,big){
   const ph=`<div class="ph"><div class="pt">${esc(b.title)}</div>${b.author?`<div class="pa">${esc(b.author)}</div>`:''}</div>`;
   const img=b.coverUrl?`<img src="${esc(b.coverUrl)}" loading="lazy" onerror="this.style.display='none'">`:'';
@@ -395,21 +595,28 @@ function card(b){
   const n=nInt(b.id);
   c.innerHTML=`<div class="cover">${coverHTML(b)}
       ${b.review?`<span class="badge-rev" title="Lecture OCR incertaine — à vérifier">à vérifier</span>`:''}
-      <span class="badge-int ${n?'on':''}">♥ ${n}</span></div>
+      ${b.status&&STATUS[b.status]?`<span class="st-badge ${STATUS[b.status].cls}" title="${STATUS[b.status].label}">${STATUS[b.status].short}</span>`:''}
+      <span class="badge-int ${n?'on':''}">♥ ${n}</span>
+      <span class="owner-badge" title="Bibliothèque de ${esc(b.owner||'')}">${esc(b.owner||'')}</span></div>
     <div class="cmeta"><div class="t">${esc(b.title)}</div>
       <div class="a">${esc(b.author||'—')}</div>
       ${b.rating?`<div class="stars" title="Note Open Library">${stars(b.rating)} <span style="color:var(--muted)">${b.rating}</span></div>`:''}
       <div class="tags"><span class="tag">${esc(b.type)}</span><span class="tag g">${esc(b.genre)}</span></div>
+      ${(b.status||b.location)?`<div class="avail">${statusChip(b)}${b.location?`<span class="loc" title="${esc(b.location)}">📍 ${esc(b.location)}</span>`:''}</div>`:''}
     </div>`;
   return c;
 }
 function render(){
   const q=$('#q').value.trim().toLowerCase();
-  const ft=$('#ftype').value, fg=$('#fgenre').value, so=$('#sort').value;
+  const ft=$('#ftype').value, fg=$('#fgenre').value, fo=$('#fowner').value, fs=$('#fstatus').value, so=$('#sort').value;
   view=BOOKS.filter(b=>{
+    if(fo==='__me__'){ if(b.owner!==USER) return false; }
+    else if(fo && b.owner!==fo) return false;
+    if(fs && b.status!==fs) return false;
     if(ft&&b.type!==ft)return false;
     if(fg&&b.genre!==fg)return false;
-    if(q){const h=(b.title+' '+(b.author||'')+' '+b.genre+' '+b.type+' '+(b.publisher||'')).toLowerCase();
+    if(q){const sl=(b.status&&STATUS[b.status])?STATUS[b.status].label:'';
+      const h=(b.title+' '+(b.author||'')+' '+b.genre+' '+b.type+' '+(b.publisher||'')+' '+(b.owner||'')+' '+(b.location||'')+' '+sl).toLowerCase();
       if(!h.includes(q))return false;}
     return true;
   });
@@ -453,7 +660,11 @@ function closeSheet(){ $('#overlay').classList.remove('on'); document.body.style
 function step(d){ current=(current+d+view.length)%view.length; editVerif=false; drawSheet(); $('#sheet').scrollTop=0; }
 function drawSheet(){
   const b=view[current]; const cmts=COMMENTS[b.id]||[];
+  const editable = !!USER && !b._seed && b.owner===USER;
   const meta=[];
+  meta.push(`<div class="kv"><span>Bibliothèque&nbsp;:</span><b>${esc(b.owner||'—')}</b></div>`);
+  if(b.status&&STATUS[b.status])meta.push(`<div class="kv"><span>Disponibilité&nbsp;:</span><b>${STATUS[b.status].label}${b.status==='vendre'?` — ${fmtPrice(b.price)}`:''}</b></div>`);
+  if(b.location)meta.push(`<div class="kv"><span>Où le trouver&nbsp;:</span><b>${esc(b.location)}</b></div>`);
   if(b.publisher)meta.push(`<div class="kv"><span>Éditeur&nbsp;:</span><b>${esc(b.publisher)}</b></div>`);
   if(b.year)meta.push(`<div class="kv"><span>Année&nbsp;:</span><b>${esc(b.year)}</b></div>`);
   if(b.rating)meta.push(`<div class="kv"><span>Note&nbsp;:</span><b>${b.rating}/5 <span style="color:var(--accent)">${stars(b.rating)}</span>${b.ratingCount?` · ${b.ratingCount} avis`:''}</b></div>`);
@@ -478,6 +689,10 @@ function drawSheet(){
         ${meta.join('')}
         <div class="sheet-tags"><span class="tag">${esc(b.type)}</span><span class="tag g">${esc(b.genre)}</span>
           ${b.review?`<span class="badge-rev" id="sheetRevBadge" style="position:static" title="Voir la photo d'origine pour vérifier">⚠ à vérifier — voir la photo</span>`:''}</div>
+        ${editable?`<div class="sheet-controls">
+          <button class="edit" id="bEdit">✏️ Modifier</button>
+          <button class="del" id="bDel">🗑 Supprimer</button>
+        </div>`:''}
       </div>
     </div>
     <div class="summary">${esc(b.summary)||'<span style="color:var(--muted)">Pas de description disponible.</span>'}
@@ -512,6 +727,12 @@ function drawSheet(){
   $('#sheetBody').querySelectorAll('.srcthumb').forEach(t=>{ if(!t.dataset.full) return; const isBox=bx&&t.dataset.name===bx.photo; t.onclick=()=>openLightbox(t.dataset.full,t.dataset.name,isBox?bx:null,isBox?b.title:''); });
   const rb=$('#sheetRevBadge'); if(rb&&b.photos&&b.photos.length) rb.onclick=()=> bx?openLightbox('photos/'+bx.photo,bx.photo,bx,b.title):openLightbox('photos/'+b.photos[0],b.photos[0]);
   const ve=$('#verifEdit'); if(ve) ve.onclick=()=>{ editVerif=true; drawSheet(); };
+  const be=$('#bEdit'); if(be) be.onclick=()=>openBookForm(b);
+  const bd=$('#bDel'); if(bd) bd.onclick=async()=>{
+    if(!confirm('Supprimer « '+b.title+' » de votre liste ?')) return;
+    try{ await deleteBook(b.id); toast('Livre supprimé.'); closeSheet(); refreshFacets(); render(); }
+    catch(e){ console.error(e); toast('Échec de la suppression.'); }
+  };
   const vf=$('#vform'); if(vf) vf.onsubmit=async ev=>{
     ev.preventDefault();
     const titre=$('#vtitre').value.trim(), auteur=$('#vauteur').value.trim(), nom=$('#vnom').value.trim();
@@ -573,23 +794,189 @@ async function commitBox(){
 function fmtDate(s){ try{const d=new Date(s);return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';} }
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600);}
 
+/* ---------- identité utilisateur (gestion de sa propre liste) ---------- */
+function setUser(name){
+  USER=(name||'').trim().slice(0,60);
+  if(USER) localStorage.setItem('bh_user',USER); else localStorage.removeItem('bh_user');
+  renderUserbar(); refreshFacets(); render();
+}
+function promptUser(){
+  const n=prompt('Votre nom — pour gérer votre propre liste de livres (ajout / modification / suppression) :', USER||'');
+  if(n!==null) setUser(n);
+}
+function renderUserbar(){
+  const bar=$('#userbar'); if(!bar) return;
+  if(USER){
+    bar.innerHTML=`<span class="who">📚 Vous gérez la liste de <b>${esc(USER)}</b></span>
+      <button id="ubChange">Changer de nom</button>
+      <button id="ubLogout">Quitter</button>`;
+    $('#ubChange').onclick=promptUser;
+    $('#ubLogout').onclick=()=>setUser('');
+  }else{
+    bar.innerHTML=`<span>Vous consultez en visiteur·e.</span>
+      <button class="primary" id="ubLogin">Gérer ma liste de livres</button>`;
+    $('#ubLogin').onclick=promptUser;
+  }
+}
+
+/* ---------- filtre par bibliothèque (propriétaire) + facettes ---------- */
+function owners(){
+  const s=new Set(BOOKS.map(b=>b.owner).filter(Boolean));
+  if(USER) s.add(USER);
+  return [...s].sort((a,b)=>a.localeCompare(b,'fr'));
+}
+function fillOwnerSelect(){
+  const sel=$('#fowner'); if(!sel) return; const cur=sel.value;
+  sel.innerHTML=`<option value="">Toutes les bibliothèques</option>`
+    +(USER?`<option value="__me__">⭐ Ma liste (${esc(USER)})</option>`:'')
+    +owners().map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('');
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
+}
+function refreshFacets(){
+  const types=[...new Set(BOOKS.map(b=>b.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+  const genres=[...new Set(BOOKS.map(b=>b.genre).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+  const t=$('#ftype').value, g=$('#fgenre').value;
+  fillSelect($('#ftype'),'Tous les types',types); if([...$('#ftype').options].some(o=>o.value===t)) $('#ftype').value=t;
+  fillSelect($('#fgenre'),'Tous les genres',genres); if([...$('#fgenre').options].some(o=>o.value===g)) $('#fgenre').value=g;
+  fillOwnerSelect();
+}
+
+/* ---------- formulaire d'ajout / modification d'un livre ---------- */
+function openBookForm(book){
+  if(!USER){ promptUser(); if(!USER) return; }
+  formEditId = book ? book.id : null;
+  const b=book||{};
+  formPhotoFile=null;
+  $('#bformWrap').innerHTML=`
+    <form class="bform" id="bform">
+      <h3>${book?'Modifier le livre':'Numériser un livre'}</h3>
+      <p class="sub">Liste de <b>${esc(USER)}</b>. Prenez une photo du livre : on tentera d'en lire le titre.
+        Vous pourrez toujours corriger à la main. Seul le titre est obligatoire.</p>
+      <div class="photo-up">
+        <div class="photo-prev" id="fPrevWrap"></div>
+        <div class="photo-actions">
+          <label class="filebtn">📷 Photo du livre<input id="fPhoto" type="file" accept="image/*" capture="environment" hidden></label>
+          <button type="button" class="ocrbtn" id="fOcr">✨ Lire le titre sur la photo</button>
+          <span class="upnote" id="fUpNote"></span>
+        </div>
+      </div>
+      <label>Titre *<input id="fTitle" type="text" maxlength="300" required value="${esc(b.title||'')}"></label>
+      <div class="brow">
+        <label>Auteur<input id="fAuthor" type="text" maxlength="300" value="${esc(b.author||'')}"></label>
+        <label>Année<input id="fYear" type="number" min="0" max="2100" value="${b.year!=null?esc(b.year):''}"></label>
+      </div>
+      <div class="brow">
+        <label>Disponibilité<select id="fStatusSel">
+          <option value="">— Non précisé —</option>
+          ${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${b.status===k?'selected':''}>${v.label}</option>`).join('')}
+        </select></label>
+        <label id="fPriceRow" style="display:none">Prix (€)<input id="fPrice" type="number" min="0" step="0.5" value="${b.price!=null?esc(b.price):''}"></label>
+      </div>
+      <label>Où le trouver<input id="fLocation" type="text" maxlength="200" placeholder="ex. Étagère entrée du 47, Chez Duc…" value="${esc(b.location||'')}"></label>
+      <div class="brow">
+        <label>Type<input id="fType" type="text" maxlength="120" placeholder="ex. Roman, BD…" value="${esc(b.type&&b.type!=='Autre'?b.type:'')}"></label>
+        <label>Genre<input id="fGenre" type="text" maxlength="120" placeholder="ex. Science-fiction" value="${esc(b.genre&&b.genre!=='Autre'?b.genre:'')}"></label>
+      </div>
+      <label>Éditeur<input id="fPublisher" type="text" maxlength="200" value="${esc(b.publisher||'')}"></label>
+      <label>Photo (URL) — ou collez un lien d'image<input id="fCover" type="url" maxlength="1000" placeholder="https://…" value="${esc(b.coverUrl||'')}"></label>
+      <label>Résumé / état du livre<textarea id="fSummary" maxlength="4000" placeholder="Quelques mots sur le livre, son état…">${esc(b.summary||'')}</textarea></label>
+      <div class="actions">
+        <button class="send" type="submit">${book?'Enregistrer':'Ajouter à la communauté'}</button>
+        <span class="formnote">${SHARED?'Visible par toute la communauté ayant le lien.':'⚠️ Mode local (non partagé) — voir le guide de mise en ligne.'}</span>
+      </div>
+    </form>`;
+  setFormPreview(b.coverUrl||'');
+  $('#bform').onsubmit=submitBookForm;
+  $('#fPhoto').onchange=onPhotoChosen;
+  $('#fOcr').onclick=onOcrClick;
+  $('#fCover').oninput=()=>setFormPreview($('#fCover').value.trim());
+  $('#fStatusSel').onchange=togglePrice;
+  togglePrice();
+  $('#formOverlay').classList.add('on'); document.body.style.overflow='hidden';
+  setTimeout(()=>{ const f=$('#fTitle'); if(f) f.focus(); },50);
+}
+function closeBookForm(){ $('#formOverlay').classList.remove('on'); if(!$('#overlay').classList.contains('on')) document.body.style.overflow=''; }
+function setFormPreview(url){
+  const w=$('#fPrevWrap'); if(!w) return;
+  w.innerHTML = url
+    ? `<img src="${esc(url)}" alt="" onerror="this.parentNode.innerHTML='<span class=&quot;ph-empty&quot;>Image indisponible</span>'">`
+    : `<span class="ph-empty">Pas encore de photo</span>`;
+}
+function togglePrice(){ const st=$('#fStatusSel'), row=$('#fPriceRow'); if(!st||!row) return;
+  row.style.display = st.value==='vendre' ? '' : 'none'; }
+async function onPhotoChosen(){
+  const fp=$('#fPhoto'); const file=fp.files&&fp.files[0]; if(!file) return;
+  formPhotoFile=file;
+  setFormPreview(URL.createObjectURL(file));
+  const note=$('#fUpNote');
+  if(!SHARED){ note.textContent="Mode local : la photo ne sera pas enregistrée, mais l'OCR fonctionne."; return; }
+  note.textContent='Envoi de la photo…';
+  try{ const url=await uploadPhoto(file); $('#fCover').value=url;
+    note.textContent='Photo enregistrée ✓ — cliquez « Lire le titre » si besoin.'; }
+  catch(e){ console.error(e);
+    note.textContent="Échec de l'upload (le bucket « "+PHOTO_BUCKET+" » existe-t-il ?). Vous pouvez coller une URL."; }
+}
+async function onOcrClick(){
+  const note=$('#fUpNote'); const fo=$('#fOcr');
+  const src=formPhotoFile||$('#fCover').value.trim();
+  if(!src){ note.textContent="Ajoutez d'abord une photo (ou une URL d'image)."; return; }
+  fo.disabled=true; const lbl=fo.textContent; fo.textContent='Lecture…';
+  try{
+    const text=await ocrImage(src,p=>{ note.textContent='Lecture du texte… '+Math.round(p*100)+'%'; });
+    const t=pickTitleLine(text);
+    if(t){ $('#fTitle').value=t; $('#fTitle').focus(); note.textContent='Titre proposé — corrigez si besoin.'; }
+    else note.textContent='Texte illisible — saisissez le titre à la main.';
+  }catch(e){ console.error(e); note.textContent="Lecture impossible (réseau ?). Saisissez le titre à la main."; }
+  finally{ fo.disabled=false; fo.textContent=lbl; }
+}
+async function submitBookForm(ev){
+  ev.preventDefault();
+  const statusV=$('#fStatusSel').value||null;
+  const data={ title:$('#fTitle').value.trim(), author:$('#fAuthor').value.trim(),
+    year:$('#fYear').value?parseInt($('#fYear').value,10):null,
+    type:$('#fType').value.trim()||'Autre', genre:$('#fGenre').value.trim()||'Autre',
+    publisher:$('#fPublisher').value.trim(), coverUrl:$('#fCover').value.trim(),
+    summary:$('#fSummary').value.trim(),
+    status:statusV,
+    price:(statusV==='vendre' && $('#fPrice').value!=='')?parseFloat($('#fPrice').value):null,
+    location:$('#fLocation').value.trim() };
+  if(!data.title) return;
+  const reopenId=formEditId, sheetOpen=$('#overlay').classList.contains('on');
+  const btn=$('#bform').querySelector('.send'); const lbl=btn.textContent; btn.disabled=true; btn.textContent='Enregistrement…';
+  try{
+    if(formEditId!=null) await updateBook(formEditId,data); else await saveBook(data);
+    toast(reopenId!=null?'Livre mis à jour.':'Livre ajouté à votre liste !');
+    closeBookForm(); refreshFacets(); render();
+    if(reopenId!=null && sheetOpen) open(reopenId);   // rafraîchit la fiche ouverte avec l'objet à jour
+  }catch(e){ console.error(e);
+    toast('Échec de l\'enregistrement'+(SHARED?' (la table « livres » existe-t-elle dans Supabase ?)':'')+'.');
+    btn.disabled=false; btn.textContent=lbl; }
+}
+
 /* ---------- filters & init ---------- */
 function fillSelect(sel,label,values){
   sel.innerHTML=`<option value="">${label}</option>`+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
 }
 function init(){
-  const types=[...new Set(BOOKS.map(b=>b.type))].sort((a,b)=>a.localeCompare(b,'fr'));
-  const genres=[...new Set(BOOKS.map(b=>b.genre))].sort((a,b)=>a.localeCompare(b,'fr'));
+  USER=localStorage.getItem('bh_user')||'';
+  renderUserbar();
+  const types=[...new Set(BOOKS.map(b=>b.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+  const genres=[...new Set(BOOKS.map(b=>b.genre).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
   fillSelect($('#ftype'),'Tous les types',types);
   fillSelect($('#fgenre'),'Tous les genres',genres);
-  const cov=BOOKS.filter(b=>b.coverUrl).length;
+  fillOwnerSelect();
+  const nLib=owners().length;
   $('#stats').innerHTML=`<span><b>${BOOKS.length}</b> livres</span>
+    <span><b>${nLib}</b> bibliothèque${nLib>1?'s':''}</span>
     <span><b>${types.length}</b> types</span><span><b>${genres.length}</b> genres</span>`;
   const bn=$('#banner');
   if(SHARED){bn.className='banner shared';bn.innerHTML=`<span class="dot"></span><div><b>Commentaires partagés activés.</b> Les intérêts laissés ici sont visibles par toutes les personnes qui ouvrent ce lien.</div>`;}
   else{bn.className='banner local';bn.innerHTML=`<span class="dot"></span><div><b>Mode local (commentaires non partagés).</b> L'appli est pleinement utilisable, mais pour que les intérêts circulent entre tous, activez le backend partagé (voir le guide « GUIDE-MISE-EN-LIGNE »).</div>`;}
-  ['#q','#ftype','#fgenre','#sort'].forEach(s=>$(s).addEventListener('input',render));
-  $('#reset').onclick=()=>{$('#q').value='';$('#ftype').value='';$('#fgenre').value='';$('#sort').value='auth';render();};
+  ['#q','#ftype','#fgenre','#fowner','#fstatus','#sort'].forEach(s=>$(s).addEventListener('input',render));
+  $('#reset').onclick=()=>{$('#q').value='';$('#ftype').value='';$('#fgenre').value='';$('#fowner').value='';$('#fstatus').value='';$('#sort').value='auth';render();};
+  $('#addBook').onclick=()=>openBookForm(null);
+  $('#formClose').onclick=closeBookForm;
+  $('#formOverlay').onclick=e=>{ if(e.target===$('#formOverlay'))closeBookForm(); };
   $('#close').onclick=closeSheet; $('#prev').onclick=()=>step(-1); $('#next').onclick=()=>step(1);
   $('#overlay').onclick=e=>{if(e.target===$('#overlay'))closeSheet();};
   $('#lbclose').onclick=closeLightbox;
@@ -607,6 +994,7 @@ function init(){
     else { drawRect=null; $('#lbdraw').classList.remove('on'); $('#lbsave').disabled=true; } });
   document.addEventListener('keydown',e=>{
     if($('#lightbox').classList.contains('on')){ if(e.key==='Escape')closeLightbox(); return; }
+    if($('#formOverlay').classList.contains('on')){ if(e.key==='Escape')closeBookForm(); return; }
     if(!$('#overlay').classList.contains('on'))return;
     if(e.key==='Escape')closeSheet(); if(e.key==='ArrowLeft')step(-1); if(e.key==='ArrowRight')step(1);});
   render();
@@ -618,7 +1006,8 @@ async function boot(){
     $('#grid').innerHTML='<p style="color:var(--muted);padding:20px 2px">Impossible de charger la liste des livres (data/books.json).<br>Ouvrez le site via un serveur web (http/https), pas par double-clic du fichier.</p>';
     return;
   }
-  await Promise.all([loadComments(), loadCorrections(), loadBoxes()]);
+  await Promise.all([loadComments(), loadCorrections(), loadBoxes(), loadLivres()]);
+  rebuildBooks();
   applyCorrections();
   applyBoxes();
   init();
