@@ -1,4 +1,4 @@
-# Bibliothèque de Thanh Nghiem — guide d'utilisation
+# Club Livre de la tribu du 47 — guide d'utilisation
 
 L'application est un site statique composé de **plusieurs fichiers/dossiers — à déployer ensemble** :
 
