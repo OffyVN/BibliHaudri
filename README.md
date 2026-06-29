@@ -1,6 +1,6 @@
-# BibliHaudri
+# Club Livre de la tribu du 47
 
-Livres partagés de la communauté « Le 47 » — étagères partagées et livres proposés par chacun,
+Livres partagés de la tribu du 47 — étagères partagées et livres proposés par chacun,
 à emprunter, à donner ou à vendre. Construit autour de l'inventaire de Thanh Nghiem.
 
 Chaque membre peut gérer sa propre liste : numériser un livre en prenant une photo (lecture du
