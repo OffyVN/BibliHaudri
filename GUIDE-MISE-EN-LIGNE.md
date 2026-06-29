@@ -8,6 +8,7 @@ L'application est un site statique composé de **plusieurs fichiers/dossiers —
 - **`backend-commentaires.sql`** — à coller dans Supabase, pour les commentaires partagés.
 - **`backend-corrections.sql`** — à coller dans Supabase, pour les **corrections/validations partagées** des fiches « à vérifier ».
 - **`backend-boxes.sql`** — à coller dans Supabase, pour les **cadres partagés** (rectangles qui repèrent la tranche d'un livre sur sa photo).
+- **`backend-livres.sql`** — à coller dans Supabase, pour les **listes personnelles** : chaque utilisateur gère ses propres livres (table `livres`).
 - **`GUIDE-MISE-EN-LIGNE.md`** — ce guide.
 
 > ⚠️ Depuis cette version, les livres sont dans `data/books.json` (et non plus dans `index.html`).
@@ -63,7 +64,12 @@ On utilise **Supabase** (gratuit). Comptez ~5 minutes, une seule fois.
    (table `corrections`, pour les **validations / corrections** des fiches « à vérifier »)
 4. *New query* encore une fois, puis **`backend-boxes.sql`** → **Run**.
    (table `boxes`, pour les **cadres** dessinés sur les photos qui repèrent la tranche d'un livre)
+5. *New query* une dernière fois, puis **`backend-livres.sql`** → **Run**.
+   (table `livres`, pour les **listes personnelles** — les livres que chaque utilisateur ajoute)
 
+> Sans la table `livres`, l'appli reste utilisable mais l'ajout d'un livre via « ➕ Ajouter un livre »
+> affichera une erreur (la bibliothèque d'origine de Thanh Nghiem reste consultable).
+>
 > Sans la table `corrections`, l'appli reste utilisable mais le bouton « ✓ Valider la fiche »
 > affichera une erreur (les validations ne pourront pas être enregistrées en ligne).
 > De même, sans la table `boxes`, le bouton « ✏️ Encadrer ce livre » affichera une erreur.
@@ -103,8 +109,22 @@ Oui, vous. Dans Supabase → **Table Editor** → table `interets` (commentaires
 **ligne la plus récente** d'un livre qui fait foi.
 
 **Comment mettre à jour la liste des livres plus tard ?**
-La liste est dans **`data/books.json`** (un livre = un objet avec `title`, `author`, `summary`…).
-On peut l'éditer directement, ou me le demander. Pensez à redéployer `data/books.json` ensuite.
+La bibliothèque d'origine est dans **`data/books.json`** (un livre = un objet avec `title`, `author`,
+`summary`…). On peut l'éditer directement, ou me le demander. Pensez à redéployer `data/books.json`
+ensuite. Les livres ajoutés depuis le site (listes personnelles) vivent dans la table Supabase
+`livres`, pas dans ce fichier.
+
+**Comment plusieurs personnes peuvent-elles gérer leur propre liste ?**
+En haut de la page, cliquez **« Gérer ma liste de livres »** et indiquez votre nom (mémorisé dans
+ce navigateur, sans création de compte). Vous pouvez alors **➕ ajouter** des livres, et **modifier
+/ supprimer** ceux de votre liste depuis leur fiche. Le sélecteur **« bibliothèque »** de la barre
+d'outils permet de filtrer par personne (ou « ⭐ Ma liste »). La bibliothèque d'origine reste celle
+de **Thanh Nghiem**.
+
+> Modèle de confiance : comme pour les commentaires, il n'y a **pas d'authentification** côté serveur.
+> L'application ne propose la modification/suppression que sur *vos* livres (ceux à votre nom), mais
+> techniquement un visiteur averti pourrait agir sous un autre nom. Pour un verrouillage strict
+> (vrais comptes), il faudrait passer à **Supabase Auth** — me le demander.
 
 **Un badge « à vérifier » apparaît sur certains livres — comment le faire disparaître ?**
 Le titre/auteur a été lu automatiquement sur une photo et peut comporter une erreur. Ouvrez la
