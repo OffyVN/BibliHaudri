@@ -26,7 +26,7 @@ a{color:var(--accent-dim)}
 
 header.top{padding:26px 0 10px}
 .brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.logo{width:68px;height:68px;display:block;flex:0 0 auto}
+.logo{width:72px;height:72px;display:block;flex:0 0 auto;mix-blend-mode:multiply}
 .mark{font-weight:800;font-size:13px;letter-spacing:.22em;color:var(--accent-dim);
   border:1px solid var(--line);padding:6px 12px;border-radius:999px;text-transform:uppercase}
 h1{font-size:30px;font-weight:800;margin:14px 0 6px;line-height:1.1}
@@ -37,6 +37,11 @@ h1{font-size:30px;font-weight:800;margin:14px 0 6px;line-height:1.1}
 .toolbar{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg) 70%,rgba(255,255,255,0));
   padding:16px 0 12px;margin-top:10px}
 .toolbar-inner{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* bloc filtres : en ligne sur ordinateur, escamotable sur mobile */
+.adv{display:contents}
+.filters-toggle{display:none;align-items:center;gap:6px;white-space:nowrap}
+.filters-toggle .fcount{background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 6px;font-size:11px;font-weight:700}
 .search{flex:1 1 280px;position:relative;min-width:220px}
 .search input{width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1px solid var(--line);
   background:var(--panel);color:var(--text);font-size:15px;outline:none}
@@ -48,6 +53,12 @@ select{padding:11px 12px;border-radius:12px;border:1px solid var(--line);backgro
   color:var(--muted);font-size:14px;cursor:pointer}
 .btn-ghost:hover{color:var(--text);border-color:var(--accent-dim)}
 .count{color:var(--muted);font-size:13px;margin:4px 2px 16px}
+@media(max-width:640px){
+  .filters-toggle{display:inline-flex}
+  .adv{display:none;width:100%}
+  .adv.open{display:flex;flex-wrap:wrap;gap:10px;width:100%;margin-top:2px}
+  .adv.open select,.adv.open .btn-ghost,.adv.open .btn-add{width:100%;max-width:none;flex:1 1 100%}
+}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:18px;padding-bottom:50px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
@@ -248,7 +259,7 @@ mark{background:rgba(229,137,123,.30);color:inherit;border-radius:3px}
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <div class="brand"><img class="logo" src="assets/logo-47.svg" alt="Le 47" width="68" height="68">
+  <div class="brand"><img class="logo" src="assets/logo47.png" alt="Le 47" width="72" height="72">
     <span class="mark">Club Livre · tribu du 47</span></div>
   <h1>Club Livre de la tribu du 47</h1>
   <p class="lede">Le partage de livres de la <b>tribu du 47</b> : les étagères partagées et les livres que
@@ -264,23 +275,26 @@ mark{background:rgba(229,137,123,.30);color:inherit;border-radius:3px}
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E5897B" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
     <input id="q" type="search" placeholder="Rechercher un titre, un auteur, un genre…" autocomplete="off">
   </label>
-  <select id="fowner"></select>
-  <select id="fstatus">
-    <option value="">Toutes dispos</option>
-    <option value="emprunter">À emprunter</option>
-    <option value="donner">À donner</option>
-    <option value="vendre">À vendre</option>
-  </select>
-  <select id="ftype"></select>
-  <select id="fgenre"></select>
-  <select id="sort">
-    <option value="auth">Trier : auteur</option>
-    <option value="title">Trier : titre</option>
-    <option value="int">Trier : intérêts reçus</option>
-    <option value="rating">Trier : note</option>
-  </select>
-  <button class="btn-ghost" id="reset">Réinitialiser</button>
-  <button class="btn-add" id="addBook">➕ Ajouter un livre</button>
+  <button class="btn-ghost filters-toggle" id="filtersToggle" type="button" aria-expanded="false" aria-controls="advFilters">Filtres ▾</button>
+  <div class="adv" id="advFilters">
+    <select id="fowner"></select>
+    <select id="fstatus">
+      <option value="">Toutes dispos</option>
+      <option value="emprunter">À emprunter</option>
+      <option value="donner">À donner</option>
+      <option value="vendre">À vendre</option>
+    </select>
+    <select id="ftype"></select>
+    <select id="fgenre"></select>
+    <select id="sort">
+      <option value="auth">Trier : auteur</option>
+      <option value="title">Trier : titre</option>
+      <option value="int">Trier : intérêts reçus</option>
+      <option value="rating">Trier : note</option>
+    </select>
+    <button class="btn-ghost" id="reset">Réinitialiser</button>
+    <button class="btn-add" id="addBook">➕ Ajouter un livre</button>
+  </div>
 </div></div></div>
 
 <main class="wrap">
@@ -633,6 +647,14 @@ function render(){
   const g=$('#grid'); g.innerHTML='';
   view.forEach(b=>g.appendChild(card(b)));
   $('#count').textContent=`${view.length} livre${view.length>1?'s':''} affiché${view.length>1?'s':''}`;
+  updateFilterToggle();
+}
+function updateFilterToggle(){
+  const b=$('#filtersToggle'); if(!b) return;
+  const open=$('#advFilters').classList.contains('open');
+  const n=['#fowner','#fstatus','#ftype','#fgenre'].filter(s=>$(s).value).length;
+  b.innerHTML=`Filtres${n?` <span class="fcount">${n}</span>`:''} ${open?'▴':'▾'}`;
+  b.setAttribute('aria-expanded', open?'true':'false');
 }
 
 /* ---------- detail sheet ---------- */
@@ -977,6 +999,7 @@ function init(){
   if(SHARED){bn.className='banner shared';bn.innerHTML=`<span class="dot"></span><div><b>Commentaires partagés activés.</b> Les intérêts laissés ici sont visibles par toutes les personnes qui ouvrent ce lien.</div>`;}
   else{bn.className='banner local';bn.innerHTML=`<span class="dot"></span><div><b>Mode local (commentaires non partagés).</b> L'appli est pleinement utilisable, mais pour que les intérêts circulent entre tous, activez le backend partagé (voir le guide « GUIDE-MISE-EN-LIGNE »).</div>`;}
   ['#q','#ftype','#fgenre','#fowner','#fstatus','#sort'].forEach(s=>$(s).addEventListener('input',render));
+  $('#filtersToggle').onclick=()=>{ $('#advFilters').classList.toggle('open'); updateFilterToggle(); };
   $('#reset').onclick=()=>{$('#q').value='';$('#ftype').value='';$('#fgenre').value='';$('#fowner').value='';$('#fstatus').value='';$('#sort').value='auth';render();};
   $('#addBook').onclick=()=>openBookForm(null);
   $('#formClose').onclick=closeBookForm;
