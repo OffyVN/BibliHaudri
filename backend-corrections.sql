@@ -12,8 +12,23 @@ create table if not exists public.corrections (
   auteur      text,
   validated   boolean     not null default true,
   nom         text,
+  -- infos rafraîchies depuis Open Library quand on corrige le titre/auteur
+  cover_url   text,        -- couverture retrouvée
+  editeur     text,
+  annee       integer,
+  resume      text,
+  note        real,        -- note moyenne
+  note_count  integer,     -- nombre d'avis
   created_at  timestamptz not null default now()
 );
+
+-- Pour les bases déjà créées avec une version précédente : ajoute les colonnes manquantes.
+alter table public.corrections add column if not exists cover_url  text;
+alter table public.corrections add column if not exists editeur    text;
+alter table public.corrections add column if not exists annee      integer;
+alter table public.corrections add column if not exists resume     text;
+alter table public.corrections add column if not exists note       real;
+alter table public.corrections add column if not exists note_count integer;
 
 create index if not exists corrections_book_id_idx on public.corrections (book_id);
 
@@ -36,6 +51,9 @@ create policy "ajout public"
     char_length(coalesce(titre,'')) between 1 and 300
     and char_length(coalesce(auteur,'')) <= 300
     and char_length(coalesce(nom,'')) <= 60
+    and char_length(coalesce(cover_url,'')) <= 1000
+    and char_length(coalesce(editeur,'')) <= 200
+    and char_length(coalesce(resume,'')) <= 4000
   );
 
 -- (Volontairement : pas de policy UPDATE/DELETE pour anon. L'historique est en "ajout seul" ;

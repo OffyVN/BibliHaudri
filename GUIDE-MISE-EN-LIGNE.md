@@ -155,7 +155,15 @@ aussi la localisation.
 Le titre/auteur a été lu automatiquement sur une photo et peut comporter une erreur. Ouvrez la
 fiche : sous les **photos d'origine**, le bloc « Vérifier cette fiche » permet de corriger le
 titre/auteur si besoin puis de cliquer **« ✓ Valider la fiche »**. Le badge disparaît alors pour
-tout le monde (validation enregistrée dans la table `corrections`).
+tout le monde (validation enregistrée dans la table `corrections`). Si vous **corrigez** le
+titre/auteur, l'application recherche automatiquement sur Open Library la **couverture** et les
+infos correspondantes (éditeur, année, résumé, note) et met la fiche à jour.
+
+> ⚠️ Cette recherche de couverture nécessite quelques **nouvelles colonnes** dans la table
+> `corrections` (`cover_url`, `editeur`, `annee`, `resume`, `note`, `note_count`). Ré-exécutez le
+> fichier **`backend-corrections.sql`** mis à jour dans le SQL Editor (les `alter table … add column
+> if not exists …` sont sans risque sur une base déjà en place). Sans ces colonnes, la validation
+> fonctionne toujours mais la couverture ne sera pas rafraîchie.
 
 **Comment « encadrer » la tranche d'un livre sur la photo (pour aider à le repérer) ?**
 Ouvrez la fiche puis **cliquez une photo** pour l'agrandir. En haut à gauche, cliquez
