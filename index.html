@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Club Livre de la tribu du 47</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo-47.svg">
+<link rel="icon" type="image/png" href="assets/logo47.png">
+<link rel="apple-touch-icon" href="assets/logo47.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -532,7 +535,7 @@ function pickTitleLine(text){
 async function loadCorrections(){
   if(SHARED){
     try{
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/${CORR_TABLE}?select=book_id,titre,auteur,validated,nom,created_at&order=created_at.asc`,
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/${CORR_TABLE}?select=*&order=created_at.asc`,
         {headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`}});
       if(!r.ok) throw new Error('GET '+r.status);
       const rows = await r.json();
@@ -549,11 +552,20 @@ function applyOneCorrection(id){
   if(!b||!c) return;
   if(c.titre)  b.title  = c.titre;
   if(c.auteur) b.author = c.auteur;
+  // infos rafraîchies depuis Open Library lors d'une correction (n'écrase que si présent)
+  if(c.cover_url) b.coverUrl = c.cover_url;
+  if(c.editeur)   b.publisher = c.editeur;
+  if(c.annee!=null && c.annee!=='') b.year = c.annee;
+  if(c.resume)    b.summary = c.resume;
+  if(c.note!=null)       b.rating = c.note;
+  if(c.note_count!=null) b.ratingCount = c.note_count;
   if(c.validated) b.review = false;   // la fiche est vérifiée -> plus de badge « à vérifier »
 }
 function applyCorrections(){ BOOKS.forEach(b=>applyOneCorrection(b.id)); }
-async function saveCorrection(bookId,titre,auteur,nom){
-  const payload = {book_id:bookId, titre:titre||null, auteur:auteur||null, validated:true, nom:nom||null};
+async function saveCorrection(bookId,data,nom){
+  const payload = {book_id:bookId, titre:data.titre||null, auteur:data.auteur||null, validated:true, nom:nom||null,
+    cover_url:data.cover_url||null, editeur:data.editeur||null, annee:data.annee!=null?data.annee:null,
+    resume:data.resume||null, note:data.note!=null?data.note:null, note_count:data.note_count!=null?data.note_count:null};
   const row = {...payload, created_at:new Date().toISOString()};
   if(SHARED){
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${CORR_TABLE}`,{method:'POST',
@@ -565,6 +577,27 @@ async function saveCorrection(bookId,titre,auteur,nom){
   CORR[bookId] = row;
   if(!SHARED) localStorage.setItem('corrections_local',JSON.stringify(CORR));
   applyOneCorrection(bookId);
+}
+/* Recherche la couverture + les infos d'un livre corrigé sur Open Library (best-effort) */
+async function fetchOpenLibrary(title,author){
+  const out={};
+  try{
+    const u=`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}`
+      +(author?`&author=${encodeURIComponent(author)}`:'')
+      +`&limit=1&fields=cover_i,first_publish_year,publisher,key,ratings_average,ratings_count`;
+    const r=await fetch(u); if(!r.ok) return out;
+    const j=await r.json(); const d=(j.docs&&j.docs[0])||null; if(!d) return out;
+    if(d.cover_i) out.cover_url=`https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg`;
+    if(d.first_publish_year) out.annee=d.first_publish_year;
+    if(d.publisher&&d.publisher.length) out.editeur=d.publisher[0];
+    if(d.ratings_average) out.note=Math.round(d.ratings_average*10)/10;
+    if(d.ratings_count) out.note_count=d.ratings_count;
+    if(d.key){ try{ const wr=await fetch(`https://openlibrary.org${d.key}.json`);
+      if(wr.ok){ const w=await wr.json(); let desc=w.description; if(desc&&desc.value) desc=desc.value;
+        if(typeof desc==='string'&&desc.trim()) out.resume=desc.trim().slice(0,1500); } }catch(_){}
+    }
+  }catch(_){}
+  return out;
 }
 
 /* ---------- cadres (rectangles repérant la tranche) backend ---------- */
@@ -764,7 +797,12 @@ function drawSheet(){
     const titre=$('#vtitre').value.trim(), auteur=$('#vauteur').value.trim(), nom=$('#vnom').value.trim();
     if(!titre){ return; }
     const btn=vf.querySelector('.vbtn'); btn.disabled=true; btn.textContent='Validation…';
-    try{ await saveCorrection(b.id,titre,auteur,nom); editVerif=false; toast('Fiche vérifiée'+(nom?' — merci '+nom:'')+' !'); drawSheet(); render(); }
+    // le titre/auteur a-t-il changé par rapport à la lecture OCR d'origine ?
+    const changed = (titre!==(b._ocrTitle||'')) || (auteur!==(b._ocrAuthor||''));
+    let extra={};
+    if(changed){ btn.textContent='Recherche de la couverture…'; extra = await fetchOpenLibrary(titre,auteur); }
+    try{ await saveCorrection(b.id,{titre,auteur,...extra},nom); editVerif=false;
+      toast('Fiche vérifiée'+(extra.cover_url?' · couverture actualisée':'')+(nom?' — merci '+nom:'')+' !'); drawSheet(); render(); }
     catch(e){ console.error(e); toast('Échec de l\'enregistrement (la table « corrections » existe-t-elle dans Supabase ?)'); btn.disabled=false; btn.textContent='✓ Valider la fiche'; }
   };
 }
